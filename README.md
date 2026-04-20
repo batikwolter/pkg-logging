@@ -2,6 +2,8 @@
 
 Production-ready shared logging foundation for Go services.
 
+Integration doc for adopters: `docs/integration.md`.
+
 ## Features
 
 - Structured JSON logging via `observe.Logger` (org-owned interface)
