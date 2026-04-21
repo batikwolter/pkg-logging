@@ -9,6 +9,11 @@ Format follows Keep a Changelog principles and semantic versioning.
 ### Added
 - AGENTS project playbook with fast context map and stable contract rules.
 - `docs/releasing.md` release checklist and versioning workflow.
+- `scripts/release.sh` helper for guarded local release flow (check/test/commit/tag/push).
+- `.github/workflows/release-tag.yml` to validate and publish GitHub release on semver tag push.
+
+### Changed
+- Consolidated integration guidance into root `INTEGRATION.md` as single source of truth.
 
 ## [0.1.0] - 2026-04-20
 
@@ -23,4 +28,4 @@ Format follows Keep a Changelog principles and semantic versioning.
 - gRPC unary server interceptor with one completion log per request.
 - gRPC unary client interceptor with metadata propagation and completion logs.
 - `observe/testkit` in-memory sink and assertion helpers.
-- Integration documentation (`docs/integration.md`) and README quick start.
+- Integration documentation and README quick start.

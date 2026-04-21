@@ -2,7 +2,7 @@
 
 Production-ready shared logging foundation for Go services.
 
-Integration doc for adopters: `docs/integration.md`.
+Integration doc for adopters and AI agents: `INTEGRATION.md`.
 
 ## Features
 

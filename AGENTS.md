@@ -1,4 +1,6 @@
 @RTK.md
+@INTEGRATION.md
+@docs/releasing.md
 
 # AGENTS: pkg-logging
 
@@ -21,7 +23,7 @@ Non-goals:
 ## Fast Context (Read This First)
 If task is feature/bug/doc change, read only:
 1. `README.md`
-2. `docs/integration.md`
+2. `INTEGRATION.md`
 3. `observe/logger.go`
 4. `observe/grpc/server.go`
 5. `observe/grpc/client.go`
@@ -139,6 +141,8 @@ When touching schema/interceptors/redaction, add/adjust tests in:
 Current released tag baseline: `v0.1.0`.
 
 For next releases, follow `docs/releasing.md` and update `CHANGELOG.md`.
+Preferred command: `scripts/release.sh vX.Y.Z`.
+Tag push automation: `.github/workflows/release-tag.yml`.
 
 ## Change Strategy
 Prefer minimal diff.
