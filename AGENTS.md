@@ -1,4 +1,3 @@
-@RTK.md
 @INTEGRATION.md
 @docs/releasing.md
 
