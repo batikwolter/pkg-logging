@@ -7,6 +7,15 @@ Format follows Keep a Changelog principles and semantic versioning.
 ## [Unreleased]
 
 ### Added
+- MIT license for public package consumption.
+- CI workflow for `push` and `pull_request` validation with `go test ./...`.
+
+### Changed
+- Documented public-use support posture in `README.md`.
+
+## [0.1.1] - 2026-04-21
+
+### Added
 - AGENTS project playbook with fast context map and stable contract rules.
 - `docs/releasing.md` release checklist and versioning workflow.
 - `scripts/release.sh` helper for guarded local release flow (check/test/commit/tag/push).

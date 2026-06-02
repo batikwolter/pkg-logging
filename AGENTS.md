@@ -137,7 +137,7 @@ When touching schema/interceptors/redaction, add/adjust tests in:
 - `observe/grpc/*_test.go`
 
 ## Release Context
-Current released tag baseline: `v0.1.0`.
+Current released tag baseline: `v0.1.1`.
 
 For next releases, follow `docs/releasing.md` and update `CHANGELOG.md`.
 Preferred command: `scripts/release.sh vX.Y.Z`.

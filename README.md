@@ -4,6 +4,10 @@ Production-ready shared logging foundation for Go services.
 
 Integration doc for adopters and AI agents: `INTEGRATION.md`.
 
+## Project Status
+
+This package is publicly usable, but is maintained primarily for Deccara Tech services. External use is welcome; API/schema compatibility is still pre-1.0 until this package graduates to `v1.0.0`.
+
 ## Features
 
 - Structured JSON logging via `observe.Logger` (org-owned interface)
@@ -68,3 +72,7 @@ log.InfoContext(ctx, "order approved",
 ```bash
 go test ./...
 ```
+
+## License
+
+MIT. See `LICENSE`.
