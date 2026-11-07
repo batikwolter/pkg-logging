@@ -67,6 +67,14 @@ log.InfoContext(ctx, "order approved",
 - Unexpected/system failures map to error-level completion logs
 - `trace.id` is generated when missing by default; disable with `GenerateTraceID: observe.BoolPtr(false)`
 
+## Optional Sentry Logs
+
+Keep JSON stdout for Dozzle while forwarding field-redacted structured logs with
+`observe/sentry`. Applications own SDK initialization, privacy callbacks, explicit
+exception capture, and shutdown flushing. See [Sentry setup](INTEGRATION.md#17-optional-sentry-logs).
+No destination is enabled by default; the core `observe` package imports no Sentry SDK.
+The companion shares this Go module, so SDK requirements are part of the module graph.
+
 ## Tests
 
 ```bash

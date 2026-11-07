@@ -6,7 +6,12 @@ Format follows Keep a Changelog principles and semantic versioning.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-07
+
 ### Added
+- Optional opaque `Config.Destinations` with internal handler composition; JSON output remains enabled.
+- `observe/sentry.New` companion using Sentry Go SDK v0.50.0 for structured logs, with app-owned client lifecycle and exception capture.
+- Destination isolation, redaction, concurrency, client-routing and unary completion regression tests.
 - MIT license for public package consumption.
 - CI workflow for `push` and `pull_request` validation with `go test ./...`.
 

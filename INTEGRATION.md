@@ -142,6 +142,67 @@ Do not expand this package into:
 - exporter/collector framework
 - dynamic remote config system
 
+## 17) Optional Sentry Logs
+
+`observe/sentry` forwards structured logs using the official Sentry slog handler.
+JSON stdout remains enabled. Existing log calls do not change.
+
+```go
+import (
+    "context"
+    "time"
+
+    "github.com/deccara-tech/pkg-logging/observe"
+    observesentry "github.com/deccara-tech/pkg-logging/observe/sentry"
+    "github.com/getsentry/sentry-go"
+)
+
+func run(ctx context.Context, dsn string) error {
+    client, err := sentry.NewClient(sentry.ClientOptions{
+        Dsn: dsn,
+        Environment: "prod",
+        Release: "audit-bot@1.0.0",
+        SendDefaultPII: false,
+        // Supply BeforeSendLog and BeforeSend for application-specific scrubbing.
+    })
+    if err != nil { return err }
+    defer client.Close()
+    defer client.Flush(2 * time.Second) // runs before Close; check result in production
+
+    destination, err := observesentry.New(client)
+    if err != nil { return err }
+    logger, err := observe.New(observe.Config{
+        Resource: observe.Resource{ServiceName: "audit-bot", Environment: "prod"},
+        Destinations: []observe.Destination{destination},
+    })
+    if err != nil { return err }
+    logger.InfoContext(ctx, "bot ready", observe.Event("bot.ready"))
+    // Run service here; return after workers stop, before deferred flush.
+    return nil
+}
+```
+
+- SDK versions are pinned in `go.mod`; v0.50.0 enables logs by default.
+- `Config.Level` is the common minimum for stdout and Sentry. Use `BeforeSendLog`
+  for additional remote filtering, including event-based selection of INFO job failures.
+- Request/job hubs bound to the supplied client preserve SDK scope. Missing hubs or
+  hubs for another client use a fresh scope with the supplied client; no globals change.
+- `trace.id` stays a searchable custom field, not automatically a native Sentry trace.
+- This destination emits Logs only. Capture unexpected errors/panics explicitly at
+  one application boundary for Issues; `observe.Error` contains text, not original error.
+- Top-level field masking applies before either destination, including resource and
+  `With` fields. It does not scrub message/error text, nested objects or SDK-enriched
+  scope data. Keep safe scope data and configure `BeforeSendLog` / `BeforeSend`.
+  `SendDefaultPII: false` alone does not remove explicitly supplied personal data.
+- SDK buffering is best-effort, not durable delivery. No custom queue or retries.
+  Output errors do not skip the other output; existing void log methods do not return them.
+  Blocking writers/handlers still block the call; independence is not timeout isolation.
+- Flush only after service tasks finish. `os.Exit` and crashes bypass deferred flush.
+  Check `client.Flush` result during real shutdown. Remote timestamp/source metadata
+  may differ from stdout; Sentry resolves duplicate attributes using SDK behavior.
+- Omit `Destinations` to restore existing JSON-only behavior. Zero destinations and
+  nil clients are rejected. No generic destination registration API exists.
+
 ## 16) Expected Outcome
 After adoption, services should get:
 - one consistent JSON logging contract across repos

@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+
+	"github.com/deccara-tech/pkg-logging/internal/output"
 )
 
 // Logger is the org-owned logging interface.
@@ -30,11 +32,14 @@ func New(cfg Config) (Logger, error) {
 	}
 
 	level := parseLevel(cfg.levelValue())
-	handler := slog.NewJSONHandler(cfg.writer(), &slog.HandlerOptions{
+	var handler slog.Handler = slog.NewJSONHandler(cfg.writer(), &slog.HandlerOptions{
 		AddSource: cfg.AddSource,
 		Level:     level,
 	})
 
+	if len(cfg.Destinations) > 0 {
+		handler = output.Compose(handler, level, cfg.Destinations)
+	}
 	base := slog.New(handler)
 	impl := &loggerImpl{
 		backend:         base,

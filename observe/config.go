@@ -5,7 +5,13 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/deccara-tech/pkg-logging/internal/output"
 )
+
+// Destination is an opaque optional output, constructed by companion packages.
+// Its zero value is invalid. No destination changes the default JSON output.
+type Destination = output.Destination
 
 const (
 	FormatJSON   = "json"
@@ -30,6 +36,8 @@ type Config struct {
 	// Nil means default behavior (enabled).
 	GenerateTraceID *bool
 	Writer          io.Writer
+	// Destinations receive field-redacted records in addition to JSON output.
+	Destinations []Destination
 }
 
 func defaultConfig() Config {
@@ -60,6 +68,11 @@ func (c Config) withDefaults() Config {
 }
 
 func (c Config) validate() error {
+	for i, destination := range c.Destinations {
+		if !destination.Valid() {
+			return fmt.Errorf("destination %d is invalid", i)
+		}
+	}
 	level := strings.ToLower(c.Level)
 	switch level {
 	case LevelDebug, LevelInfo, LevelWarn, LevelError:
