@@ -75,6 +75,14 @@ exception capture, and shutdown flushing. See [Sentry setup](INTEGRATION.md#17-o
 No destination is enabled by default; the core `observe` package imports no Sentry SDK.
 The companion shares this Go module, so SDK requirements are part of the module graph.
 
+## Optional OTLP Logs
+
+`observe/otlp.New(provider)` adds logs through official OpenTelemetry slog bridge,
+using explicit `log.LoggerProvider`. Compose it alongside stdout and Sentry.
+Applications own fail-closed privacy processing, trusted Resource, bounded batching,
+exporters, tracing and shutdown. No global provider selection or live export setup.
+See [OTLP setup](INTEGRATION.md#18-optional-otlp-logs).
+
 ## Tests
 
 ```bash

@@ -13,7 +13,8 @@ Primary goals:
 - safe defaults
 
 Non-goals:
-- no OTel SDK
+- no OTel SDK in core `observe`; optional `observe/otlp` may use official log API/bridge
+- applications own OTel SDK providers, privacy processors, exporters and tracing; SDK imports in companion tests only
 - no Prometheus
 - no exporter/collector stack
 - no dynamic remote config

@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Format follows Keep a Changelog principles and semantic versioning.
 
-## [Unreleased]
+## [0.3.0] - 2026-11-08
+
+### Added
+- Optional `observe/otlp.New(log.LoggerProvider)` destination using official `otelslog v0.20.0`; nil and typed-nil providers rejected, no global provider selection.
+- Conversion, binding, duplicate resolution, redaction, native context correlation, isolation and concurrent logging regressions.
+- OTLP ownership/privacy integration guidance alongside stdout and Sentry.
+
+### Changed
+- Shared module includes OTel log API/SDK v0.21.0 and stable OTel v1.45.0; Go 1.25 baseline preserved. SDK used only by companion tests; core imports no OTel SDK.
 
 ## [0.2.0] - 2026-11-07
 

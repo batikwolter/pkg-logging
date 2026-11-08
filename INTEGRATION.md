@@ -138,7 +138,7 @@ If logging behavior/schema changed, update tests under:
 ## 15) Non-Goals
 Do not expand this package into:
 - full observability platform
-- metrics/tracing SDK integration
+- metrics/tracing SDK integration in core `observe` (optional `observe/otlp` uses official log API/bridge; applications own SDK/exporters/tracing)
 - exporter/collector framework
 - dynamic remote config system
 
@@ -202,6 +202,72 @@ func run(ctx context.Context, dsn string) error {
   may differ from stdout; Sentry resolves duplicate attributes using SDK behavior.
 - Omit `Destinations` to restore existing JSON-only behavior. Zero destinations and
   nil clients are rejected. No generic destination registration API exists.
+
+## 18) Optional OTLP Logs
+
+`observe/otlp` (package `observeotlp`) converts logs through official `otelslog`.
+It takes an explicit `go.opentelemetry.io/otel/log.LoggerProvider`:
+
+```go
+// provider is application-owned and already configured with a fail-closed
+// privacy wrapper around a bounded SDK batch processor. Never attach an
+// unfiltered exporter to a provider receiving arbitrary application logs.
+destination, err := observeotlp.New(provider)
+if err != nil { return err }
+logger, err := observe.New(observe.Config{
+    Resource: observe.Resource{ServiceName: "audit-bot", Environment: "prod"},
+    Destinations: []observe.Destination{destination}, // append Sentry destination here
+})
+if err != nil { return err }
+logger.InfoContext(ctx, "job ready", observe.Event("job.ready"))
+```
+
+- Nil and typed-nil providers return an error and invalid destination. No global
+  provider is selected or changed. No exporter, network client, resources, tracing,
+  environment configuration, flush or shutdown is created by this companion.
+- Pins: `otelslog v0.20.0`, log API/SDK `v0.21.0`, stable OTel `v1.45.0`.
+  Root module remains Go 1.25. SDK dependencies support companion tests; core
+  `observe` imports no OTel SDK. HTTP exporters are not package dependencies.
+  Compatible bot pins: `otlploghttp v0.21.0`, `otlptracehttp v1.45.0`.
+- `Config.Level` remains common minimum. Provider `Enabled` may further filter
+  OTLP without dropping stdout or Sentry. JSON schema and gRPC completion behavior
+  stay unchanged. SDK configuration can still block logging; companion adds no
+  asynchronous isolation itself.
+- Message becomes body; timestamp and standard DEBUG/INFO/WARN/ERROR severity are
+  preserved. Resource/With/call fields become log attributes. SDK default duplicate
+  resolution is last value wins, including call values over With/resource fields.
+  Do not enable duplicate preservation without resolving duplicates before policy.
+- Valid active OTel context supplies native TraceId/SpanId through SDK. Legacy
+  `trace.id`, `request.id`, `correlation.id` attributes do not create native parents.
+  Companion adds no source attributes; scope name is fixed to
+  `github.com/deccara-tech/pkg-logging/observe/otlp`.
+
+### Privacy and lifecycle ownership
+
+Core masking covers top-level field keys only. Messages, raw errors, nested objects,
+SDK enrichment and provider Resource are not made safe by this destination.
+
+Register **one privacy wrapper around downstream batch processor**, not separate
+privacy and batch processors. SDK invokes every registered processor even when
+an earlier `OnEmit` returns an error. Unknown/missing/wrong-type events must return
+without invoking downstream; clearing body or returning an error does not drop a
+record from separately registered exporters. Wrapper must re-evaluate each record,
+rebuild body/attributes from closed approved vocabulary, reject nested/unknown data,
+and enforce finite numeric and payload bounds. Delegate `Enabled`, `ForceFlush`
+and `Shutdown` to wrapped processor; keep processing race-safe. Provider Resource
+and instrumentation scope need independent trusted allowlists. Register downstream
+only through wrapper, exactly once. Keep diagnostics local, outside remote fan-out.
+
+Bot-owned starting bounds supported by selected SDK: `WithMaxQueueSize(512)`,
+`WithExportMaxBatchSize(128)`, `WithExportInterval(time.Second)` and
+`WithExportTimeout(time.Second)`. Configure exporter timeout/retry budget and
+transport bounds separately; queues are best-effort and drop on saturation.
+No per-record flush, synchronous exporter or durable-delivery promise.
+
+Apps own trusted endpoint/header validation, native propagation and trace privacy.
+Shutdown after intake/workers stop, freeze late telemetry, then share one bounded
+fresh-context budget across OTel provider shutdowns and Sentry flush/close.
+Companion never owns those lifecycle calls. Omit destination to disable OTLP.
 
 ## 16) Expected Outcome
 After adoption, services should get:
